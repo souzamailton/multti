@@ -8,14 +8,26 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-from app.models import User  # Import after db defined to avoid circular import
+from werkzeug.security import generate_password_hash
+from app.models import User
+from app import db
 
 def create_admin_user():
     admin_email = "contact@multticonstruction.com"
     admin_password = "Africa19!"
 
-    existing = User.query.filter_by(email=admin_email).first()
-    if not existing:
+    user = User.query.filter_by(email=admin_email).first()
+
+    if user:
+        # ✅ User exists → ensure admin role
+        if user.role != "admin":
+            user.role = "admin"
+            db.session.commit()
+            print("🔁 Existing user promoted to admin.")
+        else:
+            print("ℹ️ Admin user already exists.")
+    else:
+        # ✅ User does not exist → create admin
         admin = User(
             full_name="Admin",
             address="Admin Address",
@@ -27,8 +39,7 @@ def create_admin_user():
         db.session.add(admin)
         db.session.commit()
         print("✅ Admin user created.")
-    else:
-        print("ℹ️ Admin user already exists.")
+
 
 def create_app():
     app = Flask(__name__)
