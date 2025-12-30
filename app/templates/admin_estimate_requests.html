@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Estimate Requests</h2>
+
+{% if pending %}
+<table class="table table-bordered table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>Estimate #</th>
+            <th>Customer ID</th>
+            <th>Project Type</th>
+            <th>Status</th>
+            <th>Submitted On</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in pending %}
+        <tr>
+            <td>{{ e.estimate_number }}</td>
+            <td>{{ e.customer_id }}</td>
+            <td>{{ e.project_type }}</td>
+            <td>
+                <span class="badge bg-warning text-dark">
+                    {{ e.status }}
+                </span>
+            </td>
+            <td>{{ e.timestamp.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('main.admin_view_estimate_request', estimate_id=e.id) }}" class="btn btn-sm btn-info">
+    View Request
+</a>
+
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">
+    No estimate requests available.
+</div>
+{% endif %}
+
+{% endblock %}

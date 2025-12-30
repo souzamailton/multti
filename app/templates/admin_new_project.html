@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Create New Project</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <div class="row">
+        <!-- Customer Info -->
+        <div class="col-md-6">
+            <h5>Customer Info</h5>
+            <div class="mb-3">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" name="full_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" name="address" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="text" class="form-control" name="phone" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email (optional)</label>
+                <input type="email" class="form-control" name="email">
+                <div class="form-text">If left blank or not matched to existing user, project will require assignment.</div>
+            </div>
+        </div>
+
+        <!-- Project Info -->
+        <div class="col-md-6">
+            <h5>Project Info</h5>
+            <div class="mb-3">
+                <label for="project_type" class="form-label">Project Type</label>
+                <select name="project_type" id="project_type" class="form-select" required>
+                    <option value="">-- Select --</option>
+                    {% for pt in services_json.keys() %}
+                        <option value="{{ pt }}">{{ pt }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Select Services</label>
+                <div id="services-container"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="total_sqft" class="form-label">Total Square Feet</label>
+                <input type="number" class="form-control" name="total_sqft" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="sketch" class="form-label">Upload Sketch (optional)</label>
+                <input type="file" class="form-control" name="sketch" accept="image/*,.pdf">
+            </div>
+
+            <div class="mb-3">
+                <label for="details" class="form-label">Project Details / Notes</label>
+                <textarea name="details" class="form-control" rows="4" required></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3 text-end">
+        <button type="submit" class="btn btn-primary">Create Project</button>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+<script>
+    // Dynamic service options based on project type
+    const SERVICES = {{ services_json | tojson }};
+    const projectTypeSelect = document.getElementById('project_type');
+    const servicesContainer = document.getElementById('services-container');
+
+    projectTypeSelect.addEventListener('change', function () {
+        const selectedType = this.value;
+        const services = SERVICES[selectedType] || [];
+        servicesContainer.innerHTML = '';
+
+        services.forEach(service => {
+            const checkbox = document.createElement('div');
+            checkbox.classList.add('form-check');
+            checkbox.innerHTML = `
+                <input class="form-check-input" type="checkbox" name="services" value="${service}" id="${service}">
+                <label class="form-check-label" for="${service}">${service}</label>
+            `;
+            servicesContainer.appendChild(checkbox);
+        });
+    });
+</script>
+{% endblock %}

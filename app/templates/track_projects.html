@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Your Projects</h2>
+
+<!-- In Progress Projects -->
+<h4>In Progress</h4>
+{% if in_progress %}
+{% for p in in_progress %}
+<div class="card mb-4">
+    <div class="card-header">
+        <strong>Project #{{ p.project_number }}</strong> - {{ p.project_type }}
+    </div>
+    <div class="card-body">
+        <p><strong>Status:</strong> {{ p.status }}</p>
+        <p><strong>Services:</strong> {{ p.services }}</p>
+        <p><strong>Total SqFt:</strong> {{ p.total_sqft }}</p>
+        <p><strong>Created:</strong> {{ p.created_at.strftime('%Y-%m-%d') }}</p>
+
+        {% if p.sketch_filename %}
+            <p><strong>Sketch:</strong><br>
+                <img src="{{ url_for('static', filename='uploads/' ~ p.sketch_filename) }}" class="img-fluid" style="max-height: 300px;">
+            </p>
+        {% endif %}
+
+        {% if p.schedule_data %}
+        <h5>Scheduled Dates:</h5>
+        <ul class="list-group mb-3">
+            {% for service, date in p.schedule_data.items() %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ service }}</span>
+                    <span>{{ date }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Approval Actions -->
+        {% if p.status == 'Waiting for Schedule Approval' %}
+            <a href="{{ url_for('main.approve_schedule', project_id=p.id) }}" class="btn btn-success btn-sm">Approve Schedule</a>
+            <a href="{{ url_for('main.request_new_schedule', project_id=p.id) }}" class="btn btn-danger btn-sm">Request New Dates</a>
+        {% elif p.status == 'Schedule Approved' %}
+            <span class="text-success">Schedule Approved</span>
+        {% else %}
+            <span class="text-muted">In Progress</span>
+        {% endif %}
+
+        <hr>
+
+        <!-- Upload file -->
+        <h5>Upload a File / Picture</h5>
+        <form method="POST" action="{{ url_for('main.upload_project_file', project_id=p.id) }}" enctype="multipart/form-data">
+            <div class="mb-2">
+                <input type="file" name="file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+        </form>
+
+        <!-- Send message -->
+        <h5 class="mt-4">Send a Message to Project Manager</h5>
+        <form method="POST" action="{{ url_for('main.send_project_message', project_id=p.id) }}">
+            <div class="mb-2">
+                <textarea name="message" class="form-control" rows="3" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm">Send Message</button>
+        </form>
+
+        <!-- Messages -->
+        {% if p.messages %}
+        <h6 class="mt-4">Message History</h6>
+        <ul class="list-group">
+            {% for msg in p.messages %}
+            <li class="list-group-item">
+                <strong>{{ 'You' if msg.sender == 'customer' else 'Admin' }}:</strong> {{ msg.content }}<br>
+                <small class="text-muted">{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Uploaded Files -->
+        {% if p.uploads %}
+        <h6 class="mt-4">Files You Uploaded</h6>
+        <ul class="list-group">
+            {% for file in p.uploads %}
+            <li class="list-group-item">
+                <a href="{{ url_for('static', filename='project_uploads/' ~ file.filename) }}" target="_blank">
+                    {{ file.filename }}
+                </a>
+                <small class="text-muted"> - {{ file.timestamp.strftime('%Y-%m-%d') }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Admin Files -->
+        {% if p.admin_files %}
+        <h6 class="mt-4">Documents from Admin</h6>
+        <ul class="list-group">
+            {% for file in p.admin_files %}
+            <li class="list-group-item">
+                <a href="{{ url_for('static', filename='admin_docs/' ~ file) }}" target="_blank">{{ file }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<p>No in-progress projects.</p>
+{% endif %}
+
+<hr>
+
+<!-- Completed Projects -->
+<h4>Completed Projects</h4>
+{% if completed %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Project #</th>
+            <th>Type</th>
+            <th>Services</th>
+            <th>Completed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in completed %}
+        <tr>
+            <td>{{ p.project_number }}</td>
+            <td>{{ p.project_type }}</td>
+            <td>{{ p.services }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No completed projects.</p>
+{% endif %}
+
+{% endblock %}

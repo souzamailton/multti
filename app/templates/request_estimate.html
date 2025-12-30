@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Request New Estimate</h2>
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">
+        {{ form.project_type.label }} {{ form.project_type(class="form-select", id="project_type") }}
+    </div>
+
+    <div class="mb-3" id="services-container">
+        <!-- Services checkboxes will be dynamically inserted here -->
+    </div>
+
+    <div class="mb-3">
+        {{ form.images.label }}
+        {{ form.images(class="form-control", multiple=True) }}
+        <div class="form-text">You can upload up to 5 images (JPG, PNG, GIF)</div>
+    </div>
+
+    <div class="mb-3">
+        {{ form.total_sqft.label }} {{ form.total_sqft(class="form-control") }}
+    </div>
+
+    <div class="mb-3">
+        {{ form.details.label }} {{ form.details(class="form-control") }}
+    </div>
+
+    {{ form.submit(class="btn btn-success") }}
+</form>
+
+<script>
+    const SERVICES = {{ services_json|safe }};
+    const servicesContainer = document.getElementById('services-container');
+    const projectTypeSelect = document.getElementById('project_type');
+
+    function renderServices(type) {
+        const services = SERVICES[type] || [];
+        servicesContainer.innerHTML = '';
+        services.forEach(service => {
+            const checkbox = `<div class="form-check">
+                <input class="form-check-input" type="checkbox" name="services" value="${service}" id="${service}">
+                <label class="form-check-label" for="${service}">${service}</label>
+            </div>`;
+            servicesContainer.innerHTML += checkbox;
+        });
+    }
+
+    projectTypeSelect.addEventListener('change', (e) => {
+        renderServices(e.target.value);
+    });
+
+    // On load
+    renderServices(projectTypeSelect.value);
+</script>
+{% endblock %}

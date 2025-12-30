@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Manage Projects</h2>
+
+<!-- In Progress Projects -->
+<h4 class="mt-4">In Progress</h4>
+{% if in_progress %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Project #</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in in_progress %}
+        <tr>
+            <td>{{ p.project_number }}</td>
+            <td>{{ p.customer.full_name if p.customer else 'Unassigned' }}</td>
+            <td>{{ p.project_type }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('main.view_project_admin', project_id=p.id) }}" class="btn btn-sm btn-primary">View / Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No in-progress projects found.</p>
+{% endif %}
+
+<!-- Waiting for Schedule Approval -->
+<h4 class="mt-5">Waiting for Customer Approval</h4>
+{% if waiting %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Project #</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in waiting %}
+        <tr>
+            <td>{{ p.project_number }}</td>
+            <td>{{ p.customer.full_name if p.customer else 'Unassigned' }}</td>
+            <td>{{ p.project_type }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('main.view_project_admin', project_id=p.id) }}" class="btn btn-sm btn-primary">View / Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No pending approvals.</p>
+{% endif %}
+
+<!-- Completed Projects -->
+<h4 class="mt-5">Completed Projects</h4>
+{% if completed %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Project #</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Completed On</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in completed %}
+        <tr>
+            <td>{{ p.project_number }}</td>
+            <td>{{ p.customer.full_name if p.customer else 'Unassigned' }}</td>
+            <td>{{ p.project_type }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('main.view_project_admin', project_id=p.id) }}" class="btn btn-sm btn-secondary">View</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No completed projects found.</p>
+{% endif %}
+
+{% endblock %}

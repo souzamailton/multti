@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Welcome, {{ current_user.full_name }}</h2>
+
+<p>
+    <a href="{{ url_for('main.request_estimate') }}" class="btn btn-primary">Request New Estimate</a>
+</p>
+
+<!-- Estimate Requests -->
+<h4>Your Estimate Requests</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Estimate #</th>
+            <th>Project Type</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in estimates %}
+        <tr>
+            <td>{{ e.estimate_number }}</td>
+            <td>{{ e.project_type }}</td>
+            <td>{{ e.status }}</td>
+            <td>{{ e.timestamp.strftime('%Y-%m-%d') }}</td>
+            <td>
+                {% if e.status == 'Estimate Received' and e.estimate_pdf %}
+                    <a href="{{ url_for('static', filename='estimates/' ~ e.estimate_pdf) }}" target="_blank" class="btn btn-sm btn-secondary">View PDF</a>
+                    <a href="{{ url_for('main.approve_estimate', estimate_id=e.id) }}" class="btn btn-sm btn-success">Approve</a>
+                    <a href="{{ url_for('main.decline_estimate', estimate_id=e.id) }}" class="btn btn-sm btn-danger">Decline</a>
+                {% elif e.status == 'Estimate Approved' %}
+                    <span class="text-success">Approved</span>
+                {% elif e.status == 'Declined' %}
+                    <span class="text-danger">Declined</span>
+                {% else %}
+                    <span class="text-muted">No action</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Projects Section -->
+{% if projects %}
+<h4 class="mt-5">Your Projects</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Project #</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in projects %}
+        <tr>
+            <td>{{ p.project_number }}</td>
+            <td>{{ p.project_type }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                {% if p.status == 'Waiting for Schedule Approval' %}
+                    <a href="{{ url_for('main.approve_schedule', project_id=p.id) }}" class="btn btn-sm btn-success">
+                        Approve Schedule
+                    </a>
+                    <a href="{{ url_for('main.request_new_schedule', project_id=p.id) }}" class="btn btn-sm btn-danger">
+                        Request New Dates
+                    </a>
+                {% elif p.status == 'Schedule Approved' %}
+                    <span class="text-success">Schedule Approved</span>
+                {% else %}
+                    <span class="text-muted">{{ p.status }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<a href="{{ url_for('main.logout') }}" class="btn btn-danger mt-4">Logout</a>
+
+{% endblock %}

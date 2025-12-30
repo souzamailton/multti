@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Admin Dashboard</h2>
+
+<!-- Projects In Progress -->
+<h4 class="mt-4">Projects In Progress</h4>
+{% if in_progress_projects %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Project #</th>
+            <th>Customer ID</th>
+            <th>Type</th>
+            <th>Services</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in in_progress_projects %}
+        <tr>
+            <td>{{ p.project_number }}</td>
+            <td>{{ p.customer_id }}</td>
+            <td>{{ p.project_type }}</td>
+            <td>{{ p.services }}</td>
+            <td>{{ p.status }}</td>
+            <td>{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                {% if p.status == 'Pending Schedule' %}
+                    <a href="{{ url_for('main.schedule_project', project_id=p.id) }}" class="btn btn-sm btn-warning">
+                        Schedule
+                    </a>
+                {% elif p.status == 'Waiting for Schedule Approval' %}
+                    <span class="text-info">Waiting Approval</span>
+                {% elif p.status == 'Schedule Approved' %}
+                    <span class="text-success">Schedule Approved</span>
+                {% else %}
+                    <span class="text-muted">{{ p.status }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No projects in progress.</p>
+{% endif %}
+
+<hr class="my-5">
+
+<!-- Estimate Requests -->
+<h4 class="mt-4">Estimate Requests</h4>
+{% if estimate_requests %}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Estimate #</th>
+            <th>Customer ID</th>
+            <th>Type</th>
+            <th>Services</th>
+            <th>Status</th>
+            <th>Requested</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for e in estimate_requests %}
+        <tr>
+            <td>{{ e.estimate_number }}</td>
+            <td>{{ e.customer_id }}</td>
+            <td>{{ e.project_type }}</td>
+            <td>{{ e.services }}</td>
+            <td>
+                {% if e.status == 'Waiting Estimate' %}
+                    <span class="text-warning">Waiting Estimate</span>
+                {% elif e.status == 'Estimate Received' %}
+                    <span class="text-info">Waiting Customer Approval</span>
+                {% elif e.status == 'Estimate Approved' %}
+                    <span class="text-success">Approved</span>
+                {% elif e.status == 'Declined' %}
+                    <span class="text-danger">Declined</span>
+                {% endif %}
+            </td>
+            <td>{{ e.timestamp.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <a href="{{ url_for('main.admin_view_estimate_request', estimate_id=e.id) }}" class="btn btn-sm btn-primary">
+                    View
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No estimate requests found.</p>
+{% endif %}
+
+{% endblock %}

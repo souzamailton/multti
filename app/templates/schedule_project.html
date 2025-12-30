@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Schedule Project: {{ project.project_number }}</h3>
+<p><strong>Customer:</strong> {{ project.customer.full_name }}</p>
+<p><strong>Project Type:</strong> {{ project.project_type }}</p>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    {% for service in services %}
+        {% set field_name = service.strip().replace(' ', '_').lower() %}
+        <div class="mb-3">
+            {{ form[field_name].label }}:
+            {{ form[field_name](class="form-control", type="date") }}
+        </div>
+    {% endfor %}
+
+    {{ form.submit(class="btn btn-success") }}
+</form>
+
+<a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary mt-3">Back</a>
+
+{% endblock %}

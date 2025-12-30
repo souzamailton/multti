@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2>Estimate Request: {{ estimate.estimate_number }}</h2>
+
+<!-- ✅ Customer Info -->
+<h5 class="mt-4">Customer Info</h5>
+<table class="table table-sm table-bordered w-50">
+    <tr>
+        <th>Full Name</th>
+        <td>{{ customer.full_name }}</td>
+    </tr>
+    <tr>
+        <th>Email</th>
+        <td>{{ customer.email }}</td>
+    </tr>
+    <tr>
+        <th>Phone</th>
+        <td>{{ customer.phone }}</td>
+    </tr>
+    <tr>
+        <th>Address</th>
+        <td>{{ customer.address }}</td>
+    </tr>
+</table>
+
+<!-- Estimate Details -->
+<h5 class="mt-4">Estimate Details</h5>
+<table class="table table-bordered">
+    <tr>
+        <th>Project Type</th>
+        <td>{{ estimate.project_type }}</td>
+    </tr>
+    <tr>
+        <th>Selected Services</th>
+        <td>{{ estimate.services }}</td>
+    </tr>
+    <tr>
+        <th>Total Square Feet</th>
+        <td>{{ estimate.total_sqft }}</td>
+    </tr>
+    <tr>
+        <th>Details</th>
+        <td>{{ estimate.details }}</td>
+    </tr>
+    <tr>
+        <th>Sketch Uploaded</th>
+        <td>
+            {% if estimate.sketch_filename %}
+                <a href="{{ url_for('static', filename='uploads/' ~ estimate.sketch_filename) }}" target="_blank">View Sketch</a>
+            {% else %}
+                None
+            {% endif %}
+        </td>
+    </tr>
+</table>
+
+<!-- 💡 Display Uploaded Images -->
+{% if estimate.image_filenames %}
+    <h5 class="mt-4">Uploaded Photos</h5>
+    <div class="row">
+        {% for img in estimate.image_filenames.split(',') %}
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('static', filename='uploads/' ~ img) }}" target="_blank">
+                <img src="{{ url_for('static', filename='uploads/' ~ img) }}" alt="Uploaded Image" class="img-fluid img-thumbnail">
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Upload Estimate PDF -->
+<hr>
+<h5>Upload Estimate PDF</h5>
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.estimate_pdf.label }} {{ form.estimate_pdf(class="form-control") }}
+    </div>
+    {{ form.submit(class="btn btn-success") }}
+</form>
+
+<a href="{{ url_for('main.admin_estimate_requests') }}" class="btn btn-secondary mt-3">Back to Estimate Requests</a>
+
+{% endblock %}
