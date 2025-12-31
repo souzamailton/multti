@@ -17,6 +17,7 @@ from wtforms import DateField, SubmitField
 from wtforms.validators import Optional
 from flask import request
 from app.models import Project, ProjectMessage, ProjectUpload
+from app.forms import MessageForm
 
 
 bp = Blueprint('main', __name__)
@@ -133,6 +134,8 @@ def request_estimate():
     return render_template('request_estimate.html', form=form, services_json=SERVICES)
 
 
+from app.forms import MessageForm
+
 @bp.route('/track-projects')
 @login_required
 def track_projects():
@@ -145,11 +148,15 @@ def track_projects():
 
     completed = Project.query.filter_by(customer_id=current_user.id, status='Completed').all()
 
+    form = MessageForm()
+
     return render_template(
         'track_projects.html',
         in_progress=in_progress,
-        completed=completed
+        completed=completed,
+        form=form
     )
+
 
 # ------------------ ADMIN ------------------
 
@@ -507,6 +514,8 @@ def manage_projects():
                            waiting=waiting,
                            completed=completed)
 
+from app.forms import MessageForm, ProjectUploadForm  # ✅ Make sure both are imported
+
 @bp.route('/admin/project/<int:project_id>/view', methods=['GET', 'POST'])
 @login_required
 def view_project_admin(project_id):
@@ -516,16 +525,24 @@ def view_project_admin(project_id):
 
     project = Project.query.get_or_404(project_id)
     customer = project.customer
-    messages = ProjectMessage.query.filter_by(project_id=project.id).order_by(ProjectMessage.timestamp.desc()).all()
-    uploads = ProjectUpload.query.filter_by(project_id=project.id).order_by(ProjectUpload.timestamp.desc()).all()
+    messages = ProjectMessage.query.filter_by(project_id=project.id)\
+        .order_by(ProjectMessage.timestamp.desc()).all()
+    uploads = ProjectUpload.query.filter_by(project_id=project.id)\
+        .order_by(ProjectUpload.timestamp.desc()).all()
+
+    message_form = MessageForm()
+    upload_form = ProjectUploadForm()
 
     return render_template(
         'view_project_admin.html',
         project=project,
         customer=customer,
         messages=messages,
-        uploads=uploads
+        uploads=uploads,
+        message_form=message_form,
+        upload_form=upload_form
     )
+
 
 @bp.route('/admin/project/<int:project_id>/complete', methods=['POST'])
 @login_required
@@ -559,3 +576,4 @@ def delete_project(project_id):
 
     flash(f"Project {project.project_number} deleted successfully.")
     return redirect(url_for('main.manage_projects'))
+

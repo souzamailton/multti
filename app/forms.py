@@ -70,3 +70,7 @@ class AdminEstimateUploadForm(FlaskForm):
 class ProjectUploadForm(FlaskForm):
     file = FileField('Select File', validators=[DataRequired()])
     submit = SubmitField('Upload')
+
+class MessageForm(FlaskForm):
+    message = TextAreaField('Message', validators=[DataRequired()])
+    submit = SubmitField('Send')

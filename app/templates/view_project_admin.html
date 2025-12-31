@@ -31,15 +31,14 @@
 
 <p>
     <a href="{{ url_for('main.schedule_project', project_id=project.id) }}" class="btn btn-warning">Reschedule</a>
+
     {% if project.status != 'Completed' %}
-        <form method="POST"
-      action="{{ url_for('main.mark_project_complete', project_id=project.id) }}"
-      onsubmit="return confirm('Mark this project as completed?');"
-      style="display:inline;">
-    <button type="submit" class="btn btn-success">
-        Mark as Completed
-    </button>
-</form>
+    <form method="POST" action="{{ url_for('main.mark_project_complete', project_id=project.id) }}"
+          onsubmit="return confirm('Mark this project as completed?');"
+          style="display:inline;">
+        {{ message_form.csrf_token }}
+        <button type="submit" class="btn btn-success">Mark as Completed</button>
+    </form>
     {% endif %}
 </p>
 
@@ -47,28 +46,26 @@
 
 <!-- Customer Uploads -->
 <h5>Customer Uploaded Files</h5>
-
 {% if uploads %}
-    <div class="row">
-        {% for file in uploads %}
-            <div class="col-md-4 mb-3">
-                {% if file.filename.endswith('.jpg') or file.filename.endswith('.jpeg') or file.filename.endswith('.png') %}
-                    <img src="{{ url_for('static', filename='project_uploads/' ~ file.filename) }}"
-                         class="img-fluid border rounded"
-                         alt="Uploaded Image">
-                {% else %}
-                    <a href="{{ url_for('static', filename='project_uploads/' ~ file.filename) }}" target="_blank">
-                        {{ file.filename }}
-                    </a>
-                {% endif %}
-                <div><small>Uploaded on {{ file.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></div>
-            </div>
-        {% endfor %}
+<div class="row">
+    {% for file in uploads %}
+    <div class="col-md-4 mb-3">
+        {% if file.filename.endswith('.jpg') or file.filename.endswith('.jpeg') or file.filename.endswith('.png') %}
+            <img src="{{ url_for('static', filename='project_uploads/' ~ file.filename) }}"
+                 class="img-fluid border rounded"
+                 alt="Uploaded Image">
+        {% else %}
+            <a href="{{ url_for('static', filename='project_uploads/' ~ file.filename) }}" target="_blank">
+                {{ file.filename }}
+            </a>
+        {% endif %}
+        <div><small>Uploaded on {{ file.timestamp.strftime('%Y-%m-%d %H:%M') }}</small></div>
     </div>
+    {% endfor %}
+</div>
 {% else %}
-    <p>No uploads from customer.</p>
+<p>No uploads from customer.</p>
 {% endif %}
-
 
 <hr>
 
@@ -76,36 +73,42 @@
 <h4>Messages</h4>
 <div class="mb-3">
     {% for m in messages %}
-        <div class="border rounded p-2 mb-2 {% if m.sender == 'admin' %}bg-light{% else %}bg-white{% endif %}">
-            <strong>{{ m.sender.capitalize() }}:</strong> {{ m.content }}<br>
-            <small class="text-muted">{{ m.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
-        </div>
+    <div class="border rounded p-2 mb-2 {% if m.sender == 'admin' %}bg-light{% else %}bg-white{% endif %}">
+        <strong>{{ m.sender.capitalize() }}:</strong> {{ m.content }}<br>
+        <small class="text-muted">{{ m.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+    </div>
     {% endfor %}
 </div>
 
-<form method="post" action="{{ url_for('main.send_project_message', project_id=project.id) }}">
+<!-- Send New Message -->
+<h5>Send Message to Customer</h5>
+<form method="POST" action="{{ url_for('main.send_project_message', project_id=project.id) }}">
+    {{ message_form.hidden_tag() }}
     <div class="mb-3">
-        <textarea name="message" class="form-control" rows="3" placeholder="Send a message to the customer..." required></textarea>
+        {{ message_form.message.label }}
+        {{ message_form.message(class="form-control", rows=3, placeholder="Type your message here...") }}
     </div>
-    <button type="submit" class="btn btn-primary">Send Message</button>
+    {{ message_form.submit(class="btn btn-primary") }}
 </form>
-
 
 <hr>
 
-<!-- Upload Document -->
+<!-- Upload File for Customer -->
 <h4>Upload File for Customer</h4>
-<form method="post" enctype="multipart/form-data" action="{{ url_for('main.upload_project_file', project_id=project.id) }}">
+<form method="POST" enctype="multipart/form-data" action="{{ url_for('main.upload_project_file', project_id=project.id) }}">
+    {{ upload_form.hidden_tag() }}
     <div class="mb-3">
-        <input type="file" name="file" class="form-control" required>
+        {{ upload_form.file(class="form-control") }}
     </div>
-    <button type="submit" class="btn btn-secondary">Upload</button>
+    {{ upload_form.submit(class="btn btn-secondary") }}
 </form>
 
 <hr>
 
 <!-- Dangerous Action -->
-<form method="post" action="{{ url_for('main.delete_project', project_id=project.id) }}" onsubmit="return confirm('Are you sure you want to delete this project?');">
+<form method="POST" action="{{ url_for('main.delete_project', project_id=project.id) }}"
+      onsubmit="return confirm('Are you sure you want to delete this project?');">
+    {{ message_form.csrf_token }}
     <button type="submit" class="btn btn-danger">Delete Project</button>
 </form>
 

@@ -4,13 +4,13 @@ from flask_login import LoginManager
 from flask_wtf import CSRFProtect
 from werkzeug.security import generate_password_hash
 
+# Initialize extensions (without app yet)
 db = SQLAlchemy()
 login_manager = LoginManager()
 csrf = CSRFProtect()
 
-from werkzeug.security import generate_password_hash
+# Import models here to avoid circular import issues
 from app.models import User
-from app import db
 
 def create_admin_user():
     admin_email = "contact@multticonstruction.com"
@@ -19,7 +19,6 @@ def create_admin_user():
     user = User.query.filter_by(email=admin_email).first()
 
     if user:
-        # ✅ User exists → ensure admin role
         if user.role != "admin":
             user.role = "admin"
             db.session.commit()
@@ -27,7 +26,6 @@ def create_admin_user():
         else:
             print("ℹ️ Admin user already exists.")
     else:
-        # ✅ User does not exist → create admin
         admin = User(
             full_name="Admin",
             address="Admin Address",
@@ -40,23 +38,22 @@ def create_admin_user():
         db.session.commit()
         print("✅ Admin user created.")
 
-
 def create_app():
     app = Flask(__name__)
 
-    # ✅ Load config (make sure your environment sets this correctly)
+    # ✅ Load configuration
     app.config.from_object("config.Config")
 
-    # ✅ Init extensions
+    # ✅ Initialize extensions with app
     db.init_app(app)
     login_manager.init_app(app)
-    csrf.init_app(app)
+    csrf.init_app(app)  # ✅ moved here, after app is created
 
     # ✅ Register blueprints
     from app.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
-    # ✅ Create DB tables and seed admin
+    # ✅ Create DB tables + ensure admin
     with app.app_context():
         db.create_all()
         create_admin_user()

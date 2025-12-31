@@ -18,31 +18,31 @@
         <p><strong>Created:</strong> {{ p.created_at.strftime('%Y-%m-%d') }}</p>
 
         {% if p.sketch_filename %}
-            <p><strong>Sketch:</strong><br>
-                <img src="{{ url_for('static', filename='uploads/' ~ p.sketch_filename) }}" class="img-fluid" style="max-height: 300px;">
-            </p>
+        <p><strong>Sketch:</strong><br>
+            <img src="{{ url_for('static', filename='uploads/' ~ p.sketch_filename) }}" class="img-fluid" style="max-height: 300px;">
+        </p>
         {% endif %}
 
         {% if p.schedule_data %}
         <h5>Scheduled Dates:</h5>
         <ul class="list-group mb-3">
             {% for service, date in p.schedule_data.items() %}
-                <li class="list-group-item d-flex justify-content-between">
-                    <span>{{ service }}</span>
-                    <span>{{ date }}</span>
-                </li>
+            <li class="list-group-item d-flex justify-content-between">
+                <span>{{ service }}</span>
+                <span>{{ date }}</span>
+            </li>
             {% endfor %}
         </ul>
         {% endif %}
 
         <!-- Approval Actions -->
         {% if p.status == 'Waiting for Schedule Approval' %}
-            <a href="{{ url_for('main.approve_schedule', project_id=p.id) }}" class="btn btn-success btn-sm">Approve Schedule</a>
-            <a href="{{ url_for('main.request_new_schedule', project_id=p.id) }}" class="btn btn-danger btn-sm">Request New Dates</a>
+        <a href="{{ url_for('main.approve_schedule', project_id=p.id) }}" class="btn btn-success btn-sm">Approve Schedule</a>
+        <a href="{{ url_for('main.request_new_schedule', project_id=p.id) }}" class="btn btn-danger btn-sm">Request New Dates</a>
         {% elif p.status == 'Schedule Approved' %}
-            <span class="text-success">Schedule Approved</span>
+        <span class="text-success">Schedule Approved</span>
         {% else %}
-            <span class="text-muted">In Progress</span>
+        <span class="text-muted">In Progress</span>
         {% endif %}
 
         <hr>
@@ -50,19 +50,24 @@
         <!-- Upload file -->
         <h5>Upload a File / Picture</h5>
         <form method="POST" action="{{ url_for('main.upload_project_file', project_id=p.id) }}" enctype="multipart/form-data">
+            {{ form.csrf_token }}
             <div class="mb-2">
                 <input type="file" name="file" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary btn-sm">Upload</button>
         </form>
 
-        <!-- Send message -->
-        <h5 class="mt-4">Send a Message to Project Manager</h5>
+        <hr>
+
+        <!-- Message form -->
+        <h5>Send a Message to Admin</h5>
         <form method="POST" action="{{ url_for('main.send_project_message', project_id=p.id) }}">
-            <div class="mb-2">
-                <textarea name="message" class="form-control" rows="3" required></textarea>
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.message.label }}
+                {{ form.message(class="form-control") }}
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm">Send Message</button>
+            {{ form.submit(class="btn btn-secondary btn-sm") }}
         </form>
 
         <!-- Messages -->
@@ -93,7 +98,7 @@
         </ul>
         {% endif %}
 
-        <!-- Admin Files -->
+        <!-- Admin Files (optional) -->
         {% if p.admin_files %}
         <h6 class="mt-4">Documents from Admin</h6>
         <ul class="list-group">
